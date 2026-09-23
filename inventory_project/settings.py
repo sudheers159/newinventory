@@ -3,12 +3,16 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = "dev-only-change-this-key"
 
-DEBUG = os.environ.get("DEBUG", "False") == "True"
+DEBUG = False
 
 ALLOWED_HOSTS = [
     "newinventory.onrender.com",
     "localhost",
     "127.0.0.1",
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    "https://newinventory.onrender.com",
 ]
 
 INSTALLED_APPS = [
