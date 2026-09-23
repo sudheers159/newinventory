@@ -6,7 +6,7 @@ SECRET_KEY = "dev-only-change-this-key"
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 
 ALLOWED_HOSTS = [
-    "inventory.onrender.com",
+    "newinventory.onrender.com",
     "localhost",
     "127.0.0.1",
 ]
