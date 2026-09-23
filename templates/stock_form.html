@@ -1,0 +1,6 @@
+{% extends "base.html" %}{% block title %}Stock{% endblock %}{% block content %}
+<h1>{% if kind == "IN" %}Stock In{% else %}Stock Out{% endif %}</h1><br>
+<form method="post" class="form">{% csrf_token %}<div class="field"><label>Product</label><select name="product" required>{% for p in products %}<option value="{{p.id}}">{{p.name}} — Current: {{p.quantity}}</option>{% endfor %}</select></div>
+<div class="field"><label>Quantity</label><input type="number" name="quantity" min="1" required></div>
+<div class="field"><label>Note</label><input name="note" placeholder="Optional note"></div>
+<button class="btn">Update Stock</button></form>{% endblock %}

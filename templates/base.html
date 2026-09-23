@@ -1,0 +1,23 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}Inventory Pro{% endblock %}</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f4f7fb;color:#172033}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:230px;background:#172554;color:white;padding:25px 15px}
+.brand{font-size:23px;font-weight:700;padding:0 12px 25px}.nav a{display:block;color:#dbeafe;text-decoration:none;padding:12px;border-radius:9px;margin:5px 0}.nav a:hover{background:#263b7a}
+.main{margin-left:230px;padding:30px;max-width:1400px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px}
+h1{margin:0 0 6px}.muted{color:#64748b}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}.card{background:white;padding:22px;border-radius:14px;box-shadow:0 3px 15px #0000000a}.num{font-size:30px;font-weight:700;margin-top:8px}
+table{width:100%;border-collapse:collapse;background:white;border-radius:12px;overflow:hidden}th,td{padding:14px;text-align:left;border-bottom:1px solid #eef2f7}th{background:#f8fafc}
+.btn{display:inline-block;border:0;border-radius:8px;padding:10px 15px;text-decoration:none;background:#2563eb;color:white;cursor:pointer}.btn.gray{background:#64748b}.btn.red{background:#dc2626}
+.form{max-width:700px;background:white;padding:25px;border-radius:14px}.field{margin-bottom:15px}label{display:block;font-weight:600;margin-bottom:6px}input,select{width:100%;padding:11px;border:1px solid #cbd5e1;border-radius:8px}
+.alert{padding:12px;background:#fee2e2;border-radius:8px;margin:10px 0}.ok{background:#dcfce7}.actions{display:flex;gap:8px}.search{display:flex;gap:10px;margin-bottom:18px}.search input{max-width:350px}
+@media(max-width:800px){.sidebar{position:static;width:100%;}.main{margin-left:0;padding:18px}.cards{grid-template-columns:1fr 1fr}}
+</style></head><body>
+<aside class="sidebar"><div class="brand">📦 Inventory Pro</div><div class="nav">
+<a href="/">📊 Dashboard</a><a href="/products/">📦 Products</a><a href="/products/add/">➕ Add Product</a>
+<a href="/stock-in/">📥 Stock In</a><a href="/stock-out/">📤 Stock Out</a><a href="/admin/">⚙ Admin</a>
+</div></aside>
+<main class="main">
+{% if messages %}{% for m in messages %}<div class="alert ok">{{m}}</div>{% endfor %}{% endif %}
+{% block content %}{% endblock %}
+</main></body></html>
