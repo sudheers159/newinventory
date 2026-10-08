@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import include, path
 from inventory import views
 
 urlpatterns = [
@@ -11,4 +11,8 @@ urlpatterns = [
     path("products/<int:pk>/delete/", views.delete_product, name="delete_product"),
     path("stock-in/", views.stock_in, name="stock_in"),
     path("stock-out/", views.stock_out, name="stock_out"),
+    path('admin/',admin.site.urls),
+    path('api/',include('inventory.api_urls')),
+
 ]
+
