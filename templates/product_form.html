@@ -1,10 +1,40 @@
 {% extends "base.html" %}{% block title %}{{title}}{% endblock %}{% block content %}
 <h1>{{title}}</h1><br><form method="post" class="form">{% csrf_token %}
-<div class="field"><label>Product Name</label><input name="name" required value="{{p.name|default:''}}"></div>
-<div class="field"><label>SKU</label><input name="sku" required value="{{p.sku|default:''}}"></div>
-<div class="field"><label>Category</label><select name="category"><option value="">-- None --</option>{% for c in categories %}<option value="{{c.id}}" {% if p.category_id == c.id %}selected{% endif %}>{{c.name}}</option>{% endfor %}</select></div>
-<div class="field"><label>Purchase Price</label><input type="number" step="0.01" name="purchase_price" value="{{p.purchase_price|default:0}}"></div>
-<div class="field"><label>Selling Price</label><input type="number" step="0.01" name="selling_price" value="{{p.selling_price|default:0}}"></div>
-<div class="field"><label>Quantity</label><input type="number" name="quantity" min="0" value="{{p.quantity|default:0}}"></div>
-<div class="field"><label>Low Stock Limit</label><input type="number" name="low_stock_limit" min="0" value="{{p.low_stock_limit|default:5}}"></div>
-<button class="btn">Save Product</button></form>{% endblock %}
+<div class="field"><label for="product-name">Product Name</label><input id="product-name" name="name" required value="{{form_values.name}}"></div>
+<div class="field"><label for="product-sku">Dealer Details</label><input id="product-sku" name="sku" required value="{{form_values.sku}}"></div>
+<div class="field"><label for="product-category">Category</label><select id="product-category" name="category"><option value="">-- None --</option>{% for c in categories %}<option value="{{c.id}}" data-category-name="{{c.name}}" {% if selected_category_id == c.id %}selected{% endif %}>{{c.name}}</option>{% endfor %}</select></div>
+<div class="field" id="subcategory-field" hidden><label for="product-subcategory">Subcategory</label><select id="product-subcategory" name="subcategory"><option value="">-- Select 5G or 4G --</option><option value="5G" {% if form_values.subcategory == "5G" %}selected{% endif %}>5G</option><option value="4G" {% if form_values.subcategory == "4G" %}selected{% endif %}>4G</option></select></div>
+<div class="field"><label for="purchase-price">Purchase</label><input id="purchase-price" type="number" step="0.01" name="purchase_price" value="{{form_values.purchase_price}}"></div>
+<div class="field"><label for="selling-price">Selling</label><input id="selling-price" type="number" step="0.01" name="selling_price" value="{{form_values.selling_price}}"></div>
+<div class="field"><label for="product-quantity">Quantity</label><input id="product-quantity" type="number" name="quantity" min="0" value="{{form_values.quantity}}"></div>
+<div class="field"><label for="low-stock-limit">Low Stock Limit</label><input id="low-stock-limit" type="number" name="low_stock_limit" min="0" value="{{form_values.low_stock_limit}}"></div>
+<button class="btn">Save Product</button></form>
+<script>
+(() => {
+  const category = document.getElementById("product-category");
+  const subcategoryField = document.getElementById("subcategory-field");
+  const subcategory = document.getElementById("product-subcategory");
+  const lowStockLimit = document.getElementById("low-stock-limit");
+  let automaticLimit = Number("{{default_low_stock_limit}}");
+
+  function updateCategoryFields(updateLimit) {
+    const isPlayingCard =
+      category.options[category.selectedIndex]?.dataset.categoryName === "Playing Card";
+    subcategoryField.hidden = !isPlayingCard;
+    subcategory.required = isPlayingCard;
+    if (!isPlayingCard) {
+      subcategory.value = "";
+    }
+    if (updateLimit) {
+      if (Number(lowStockLimit.value) === automaticLimit) {
+        lowStockLimit.value = isPlayingCard ? "2" : "5";
+      }
+      automaticLimit = isPlayingCard ? 2 : 5;
+    }
+  }
+
+  category.addEventListener("change", () => updateCategoryFields(true));
+  updateCategoryFields(false);
+})();
+</script>
+{% endblock %}

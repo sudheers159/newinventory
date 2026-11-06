@@ -3,6 +3,8 @@
 A ready-to-run Django inventory app using SQLite (no MySQL setup required).
 
 ## Features
+- Login-protected inventory screens
+- Playing Card 5G/4G subcategories and low-stock alerts
 - Dashboard
 - Products
 - Categories
@@ -24,7 +26,8 @@ py manage.py runserver
 ```
 
 Open:
-- App: http://127.0.0.1:8000/
+- Login: http://127.0.0.1:8000/login/
+- App: http://127.0.0.1:8000/ (sign in with the superuser created above)
 - Admin: http://127.0.0.1:8000/admin/
 
 ## PowerShell npm issue

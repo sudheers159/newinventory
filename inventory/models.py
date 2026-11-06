@@ -8,6 +8,11 @@ class Product(models.Model):
     name = models.CharField(max_length=150)
     sku = models.CharField(max_length=50, unique=True)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
+    subcategory = models.CharField(
+        max_length=2,
+        choices=[("5G", "5G"), ("4G", "4G")],
+        blank=True,
+    )
     purchase_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     selling_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     quantity = models.PositiveIntegerField(default=0)

@@ -24,6 +24,7 @@ class ProductSerializer(serializers.ModelSerializer):
             'sku',
             'category',
             'category_name',
+            'subcategory',
             'purchase_price',
             'selling_price',
             'quantity',

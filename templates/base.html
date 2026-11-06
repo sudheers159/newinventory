@@ -3,8 +3,9 @@
 <title>{% block title %}Inventory Pro{% endblock %}</title>
 <style>
 *{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f4f7fb;color:#172033}
-.sidebar{position:fixed;left:0;top:0;bottom:0;width:230px;background:#172554;color:white;padding:25px 15px}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:230px;background:#172554;color:white;padding:25px 15px;display:flex;flex-direction:column}
 .brand{font-size:23px;font-weight:700;padding:0 12px 25px}.nav a{display:block;color:#dbeafe;text-decoration:none;padding:12px;border-radius:9px;margin:5px 0}.nav a:hover{background:#263b7a}
+.sidebar-footer{margin-top:auto;padding:16px 12px 0;border-top:1px solid #334477;color:#bfdbfe;font-size:13px}.sidebar-footer form{margin-top:10px}.sidebar-footer button{width:100%;padding:10px;border:0;border-radius:8px;background:#263b7a;color:white;text-align:left;cursor:pointer;font:inherit}
 .main{margin-left:230px;padding:30px;max-width:1400px}.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:25px}
 h1{margin:0 0 6px}.muted{color:#64748b}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}.card{background:white;padding:22px;border-radius:14px;box-shadow:0 3px 15px #0000000a}.num{font-size:30px;font-weight:700;margin-top:8px}
 table{width:100%;border-collapse:collapse;background:white;border-radius:12px;overflow:hidden}th,td{padding:14px;text-align:left;border-bottom:1px solid #eef2f7}th{background:#f8fafc}
@@ -16,8 +17,8 @@ table{width:100%;border-collapse:collapse;background:white;border-radius:12px;ov
 <aside class="sidebar"><div class="brand">📦 Inventory Pro</div><div class="nav">
 <a href="/">📊 Dashboard</a><a href="/products/">📦 Products</a><a href="/products/add/">➕ Add Product</a>
 <a href="/stock-in/">📥 Stock In</a><a href="/stock-out/">📤 Stock Out</a><a href="/admin/">⚙ Admin</a>
-</div></aside>
+</div><div class="sidebar-footer"><div>Signed in as <strong>{{ request.user.get_username }}</strong></div><form method="post" action="{% url 'logout' %}">{% csrf_token %}<button type="submit">Sign out</button></form></div></aside>
 <main class="main">
-{% if messages %}{% for m in messages %}<div class="alert ok">{{m}}</div>{% endfor %}{% endif %}
+{% if messages %}{% for m in messages %}<div class="alert {% if m.tags != 'error' %}ok{% endif %}">{{m}}</div>{% endfor %}{% endif %}
 {% block content %}{% endblock %}
 </main></body></html>

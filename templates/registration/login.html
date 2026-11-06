@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Sign in · Inventory Pro</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;min-height:100vh;font-family:Arial,sans-serif;background:#f1f5f9;color:#172033;display:grid;place-items:center;padding:24px}
+    .login-shell{display:grid;grid-template-columns:1fr 1fr;width:min(960px,100%);min-height:580px;background:white;border-radius:24px;overflow:hidden;box-shadow:0 24px 70px #0f172a1c}
+    .welcome{display:flex;flex-direction:column;justify-content:space-between;padding:44px;background:linear-gradient(145deg,#172554,#1e40af 65%,#2563eb);color:white}
+    .brand{font-size:21px;font-weight:700;letter-spacing:-.3px}.brand-mark{display:inline-grid;place-items:center;width:36px;height:36px;margin-right:10px;border-radius:11px;background:#ffffff20;vertical-align:middle}
+    .welcome-copy{max-width:350px}.eyebrow{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:1.6px;color:#bfdbfe}
+    .welcome h1{font-size:42px;line-height:1.12;letter-spacing:-1.5px;margin:16px 0}
+    .welcome p{color:#dbeafe;line-height:1.7;margin:0}.welcome-foot{color:#bfdbfe;font-size:13px}
+    .form-panel{display:flex;align-items:center;justify-content:center;padding:48px}
+    .form-content{width:100%;max-width:360px}.form-content h2{font-size:29px;letter-spacing:-.7px;margin:0 0 9px}
+    .subtitle{color:#64748b;margin:0 0 30px;line-height:1.5}
+    .field{margin:0 0 19px}.field label{display:block;font-size:14px;font-weight:700;margin-bottom:8px}
+    .field input{width:100%;padding:13px 14px;border:1px solid #cbd5e1;border-radius:10px;font:inherit;color:#172033;outline:none;transition:border-color .15s,box-shadow .15s}
+    .field input:focus{border-color:#2563eb;box-shadow:0 0 0 3px #2563eb20}
+    .error{padding:12px 14px;margin-bottom:20px;border:1px solid #fecaca;border-radius:10px;background:#fef2f2;color:#b91c1c;font-size:14px;line-height:1.5}
+    .submit{width:100%;padding:13px 16px;border:0;border-radius:10px;background:#1d4ed8;color:white;font-size:15px;font-weight:700;cursor:pointer;transition:background .15s,transform .15s}
+    .submit:hover{background:#1e40af;transform:translateY(-1px)}.submit:focus-visible{outline:3px solid #93c5fd;outline-offset:3px}
+    .secure-note{margin-top:22px;text-align:center;color:#94a3b8;font-size:12px}
+    @media(max-width:700px){body{padding:14px}.login-shell{grid-template-columns:1fr;min-height:0;border-radius:18px}.welcome{padding:25px 28px}.welcome-copy{margin:32px 0 25px}.welcome h1{font-size:32px}.welcome-foot{display:none}.form-panel{padding:32px 28px 36px}}
+  </style>
+</head>
+<body>
+  <main class="login-shell">
+    <section class="welcome" aria-label="Inventory Pro">
+      <div class="brand"><span class="brand-mark" aria-hidden="true">▦</span>Inventory Pro</div>
+      <div class="welcome-copy">
+        <div class="eyebrow">Inventory management</div>
+        <h1>Your stock, under control.</h1>
+        <p>Sign in to keep products, stock levels, and daily operations all in one place.</p>
+      </div>
+      <div class="welcome-foot">A clearer view of your inventory starts here.</div>
+    </section>
+    <section class="form-panel" aria-labelledby="form-title">
+      <div class="form-content">
+        <h2 id="form-title">Welcome back</h2>
+        <p class="subtitle">Enter your account details to continue.</p>
+        {% if form.errors %}
+          <div class="error" role="alert">Your username or password wasn’t recognized. Please try again.</div>
+        {% endif %}
+        <form method="post">
+          {% csrf_token %}
+          <div class="field">
+            <label for="{{ form.username.id_for_label }}">Username</label>
+            <input id="{{ form.username.id_for_label }}" type="text" name="{{ form.username.html_name }}" autocomplete="username" required autofocus>
+          </div>
+          <div class="field">
+            <label for="{{ form.password.id_for_label }}">Password</label>
+            <input id="{{ form.password.id_for_label }}" type="password" name="{{ form.password.html_name }}" autocomplete="current-password" required>
+          </div>
+          {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+          <button class="submit" type="submit">Sign in</button>
+        </form>
+        <div class="secure-note">Secure sign in to your inventory workspace</div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
