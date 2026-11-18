@@ -4,7 +4,7 @@ A ready-to-run Django inventory app using SQLite (no MySQL setup required).
 
 ## Features
 - Login-protected inventory screens
-- Playing Card 5G/4G subcategories and low-stock alerts
+- Playing Card 5C/5B/4G subcategories and low-stock alerts
 - Dashboard
 - Products
 - Categories

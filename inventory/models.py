@@ -10,7 +10,7 @@ class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
     subcategory = models.CharField(
         max_length=2,
-        choices=[("5G", "5G"), ("4G", "4G")],
+        choices=[("5C", "5C"), ("5B", "5B"), ("4G", "4G")],
         blank=True,
     )
     purchase_price = models.DecimalField(max_digits=12, decimal_places=2, default=0)
