@@ -48,6 +48,7 @@ class PlayingCardProductTests(TestCase):
         self.client.force_login(user)
         self.playing_card, _ = Category.objects.get_or_create(name="Playing Card")
         self.device, _ = Category.objects.get_or_create(name="Device")
+        self.camera, _ = Category.objects.get_or_create(name="Camera")
 
     def product_data(self, category, **extra):
         data = {
@@ -112,24 +113,36 @@ class PlayingCardProductTests(TestCase):
         self.assertEqual(product.subcategory, "")
         self.assertEqual(product.low_stock_limit, 5)
 
-    def test_duplicate_dealer_details_shows_validation_error(self):
+    def test_same_dealer_details_can_be_used_across_categories(self):
         Product.objects.create(
             name="Existing",
             sku="CARD-001",
             category=self.device,
         )
 
+        response = self.client.post("/products/add/", self.product_data(self.camera))
+        self.assertRedirects(response, "/products/")
         response = self.client.post(
             "/products/add/",
-            self.product_data(self.device),
+            self.product_data(self.playing_card, subcategory="5C"),
+        )
+        self.assertRedirects(response, "/products/")
+        self.assertEqual(
+            Product.objects.filter(sku="CARD-001").count(),
+            3,
         )
 
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(
-            response,
-            "A product with these dealer details already exists.",
+    def test_duplicate_dealer_details_can_be_used_in_same_category(self):
+        Product.objects.create(
+            name="Existing",
+            sku="CARD-001",
+            category=self.device,
         )
-        self.assertEqual(Product.objects.count(), 1)
+
+        response = self.client.post("/products/add/", self.product_data(self.device))
+
+        self.assertRedirects(response, "/products/")
+        self.assertEqual(Product.objects.filter(sku="CARD-001").count(), 2)
 
     def test_product_removal_requires_post_and_succeeds(self):
         product = Product.objects.create(

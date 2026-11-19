@@ -41,11 +41,6 @@ class ProductForm(forms.ModelForm):
                 attrs={"id": "low-stock-limit", "min": 0}
             ),
         }
-        error_messages = {
-            "sku": {
-                "unique": "A product with these dealer details already exists.",
-            },
-        }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

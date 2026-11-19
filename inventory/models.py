@@ -6,7 +6,7 @@ class Category(models.Model):
 
 class Product(models.Model):
     name = models.CharField(max_length=150)
-    sku = models.CharField(max_length=50, unique=True)
+    sku = models.CharField(max_length=50)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
     subcategory = models.CharField(
         max_length=2,
@@ -18,6 +18,7 @@ class Product(models.Model):
     quantity = models.PositiveIntegerField(default=0)
     low_stock_limit = models.PositiveIntegerField(default=5)
     created_at = models.DateTimeField(auto_now_add=True)
+
     def __str__(self): return f"{self.name} ({self.sku})"
     @property
     def is_low_stock(self): return self.quantity <= self.low_stock_limit

@@ -1,6 +1,7 @@
 {% extends "base.html" %}{% block title %}{{title}}{% endblock %}{% block content %}
 <h1>{{title}}</h1><br><form method="post" class="form">{% csrf_token %}
 {% if form.errors %}<div class="alert" role="alert">Please correct the errors below.</div>{% endif %}
+{% for error in form.non_field_errors %}<div class="alert" role="alert">{{error}}</div>{% endfor %}
 <div class="field"><label for="product-name">Product Name</label><input id="product-name" name="name" required value="{{form_values.name}}">{% for error in form.name.errors %}<div class="alert">{{error}}</div>{% endfor %}</div>
 <div class="field"><label for="product-sku">Dealer Details</label><input id="product-sku" name="sku" required value="{{form_values.sku}}">{% for error in form.sku.errors %}<div class="alert">{{error}}</div>{% endfor %}</div>
 <div class="field"><label for="product-category">Category</label><select id="product-category" name="category" required><option value="">-- Select Category --</option>{% for c in categories %}<option value="{{c.id}}" data-category-name="{{c.name}}" {% if selected_category_id == c.id %}selected{% endif %}>{{c.name}}</option>{% endfor %}</select>{% for error in form.category.errors %}<div class="alert">{{error}}</div>{% endfor %}</div>
