@@ -5,7 +5,9 @@ class Category(models.Model):
     def __str__(self): return self.name
 
 class Product(models.Model):
-    name = models.CharField(max_length=150)
+    name = models.CharField(
+        max_length=150,
+    )
     sku = models.CharField(max_length=50)
     category = models.ForeignKey(Category, on_delete=models.SET_NULL, null=True, blank=True)
     subcategory = models.CharField(
@@ -18,6 +20,18 @@ class Product(models.Model):
     quantity = models.PositiveIntegerField(default=0)
     low_stock_limit = models.PositiveIntegerField(default=5)
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=("name", "category", "subcategory"),
+                name="unique_product_name_category_subcategory",
+                violation_error_message=(
+                    "A product with this name already exists in this "
+                    "category and subcategory."
+                ),
+            )
+        ]
 
     def __str__(self): return f"{self.name} ({self.sku})"
     @property

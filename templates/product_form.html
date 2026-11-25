@@ -20,7 +20,9 @@
   function updateCategoryFields(updateLimit) {
     const isPlayingCard =
       category.selectedIndex >= 0 &&
-      category.options[category.selectedIndex].dataset.categoryName === "Playing Card";
+      ["Playing Card", "Playing Cards"].includes(
+        category.options[category.selectedIndex].dataset.categoryName
+      );
     subcategoryField.hidden = !isPlayingCard;
     subcategory.required = isPlayingCard;
     if (!isPlayingCard) {

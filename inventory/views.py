@@ -3,8 +3,109 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import F, Sum
 from django.views.decorators.http import require_POST
 from django.shortcuts import get_object_or_404, redirect, render
+from django.http import HttpResponse
+from django.utils import timezone
+import csv
+import io
+
+from openpyxl import Workbook
+from reportlab.lib import colors
+from reportlab.lib.pagesizes import landscape, A4
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle
+
 from .forms import ProductForm, StockTransactionForm
 from .models import Product, Category, StockTransaction
+
+
+def filtered_products(request):
+    q = request.GET.get("q", "").strip()
+    products = Product.objects.select_related("category").all()
+    if q:
+        products = products.filter(name__icontains=q) | products.filter(sku__icontains=q)
+    return products, q
+
+
+def product_export_rows(products):
+    return [
+        [
+            product.name,
+            product.sku,
+            product.category.name if product.category else "",
+            product.subcategory,
+            product.quantity,
+            product.low_stock_limit,
+        ]
+        for product in products
+    ]
+
+
+@login_required
+def export_products(request, file_type):
+    products, _ = filtered_products(request)
+    headers = [
+        "Product Name",
+        "Dealer Details",
+        "Category",
+        "Subcategory",
+        "Quantity",
+        "Low Stock Limit",
+    ]
+    rows = product_export_rows(products)
+    filename = f"products-{timezone.localdate().isoformat()}"
+
+    if file_type == "csv":
+        response = HttpResponse(content_type="text/csv")
+        response["Content-Disposition"] = f'attachment; filename="{filename}.csv"'
+        writer = csv.writer(response)
+        writer.writerow(headers)
+        writer.writerows(rows)
+        return response
+
+    if file_type == "excel":
+        workbook = Workbook()
+        sheet = workbook.active
+        sheet.title = "Products"
+        sheet.append(headers)
+        for row in rows:
+            sheet.append(row)
+        sheet.freeze_panes = "A2"
+        sheet.auto_filter.ref = sheet.dimensions
+        for column, width in enumerate([25, 20, 20, 15, 12, 16], start=1):
+            sheet.column_dimensions[chr(64 + column)].width = width
+        output = io.BytesIO()
+        workbook.save(output)
+        response = HttpResponse(
+            output.getvalue(),
+            content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        response["Content-Disposition"] = f'attachment; filename="{filename}.xlsx"'
+        return response
+
+    if file_type == "pdf":
+        output = io.BytesIO()
+        document = SimpleDocTemplate(output, pagesize=landscape(A4))
+        elements = [
+            Paragraph("Product Inventory", getSampleStyleSheet()["Title"]),
+            Spacer(1, 12),
+        ]
+        table = Table([headers] + rows, repeatRows=1)
+        table.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#1e3a8a")),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+            ("GRID", (0, 0), (-1, -1), 0.5, colors.grey),
+            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
+            ("FONTSIZE", (0, 0), (-1, -1), 8),
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f1f5f9")]),
+        ]))
+        elements.append(table)
+        document.build(elements)
+        response = HttpResponse(output.getvalue(), content_type="application/pdf")
+        response["Content-Disposition"] = f'attachment; filename="{filename}.pdf"'
+        return response
+
+    return HttpResponse("Unsupported export type.", status=400)
 
 
 def product_form_context(title, p=None, form_data=None):
@@ -17,7 +118,8 @@ def product_form_context(title, p=None, form_data=None):
     except (TypeError, ValueError):
         selected_category = None
     is_playing_card = bool(
-        selected_category and selected_category.name == "Playing Card"
+        selected_category
+        and selected_category.name in ("Playing Card", "Playing Cards")
     )
     default_low_stock_limit = 2 if is_playing_card else 5
     form_values = {
@@ -69,10 +171,7 @@ def dashboard(request):
 
 @login_required
 def products(request):
-    q = request.GET.get("q","").strip()
-    qs = Product.objects.select_related("category").all()
-    if q:
-        qs = qs.filter(name__icontains=q) | qs.filter(sku__icontains=q)
+    qs, q = filtered_products(request)
     return render(request, "products.html", {"products": qs, "q": q})
 
 @login_required

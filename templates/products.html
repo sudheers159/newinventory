@@ -1,8 +1,38 @@
 {% extends "base.html" %}{% block title %}Products{% endblock %}{% block content %}
-<style>.stock-low{display:inline-block;padding:4px 8px;border-radius:999px;background:#fee2e2;color:#b91c1c;font-size:13px;font-weight:700}</style>
+<style>
+.stock-low{display:inline-block;padding:4px 8px;border-radius:999px;background:#fee2e2;color:#b91c1c;font-size:13px;font-weight:700}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}.export-actions{display:flex;gap:8px}
+.btn.green{background:#15803d}.btn.orange{background:#c2410c}.btn.blue{background:#1d4ed8}
+.product-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin-bottom:22px}
+.product-grid-item{background:white;border-radius:12px;padding:18px;box-shadow:0 3px 15px #0000000a;border:1px solid #eef2f7}
+.product-grid-item h3{margin:0 0 8px}.product-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;color:#475569;font-size:14px}
+.table-wrap{overflow-x:auto}
+@media(max-width:900px){.product-grid{grid-template-columns:1fr 1fr}.toolbar{align-items:flex-start;flex-direction:column}}
+@media(max-width:600px){.product-grid{grid-template-columns:1fr}}
+</style>
 <div class="top"><div><h1>Products</h1><div class="muted">Manage your inventory</div></div><a class="btn" href="/products/add/">+ Add Product</a></div>
+<div class="toolbar">
 <form class="search"><input name="q" value="{{q}}" placeholder="Search name or SKU"><button class="btn">Search</button></form>
-<table><tr><th>Product Name</th><th>Dealer Details</th><th>Category</th><th>Quantity</th><th>Low Stock Limit</th><th>Action</th></tr>
+<div class="export-actions">
+<a class="btn green" href="{% url 'export_products' 'csv' %}{% if q %}?q={{q|urlencode}}{% endif %}">CSV</a>
+<a class="btn blue" href="{% url 'export_products' 'excel' %}{% if q %}?q={{q|urlencode}}{% endif %}">Excel</a>
+<a class="btn orange" href="{% url 'export_products' 'pdf' %}{% if q %}?q={{q|urlencode}}{% endif %}">PDF</a>
+</div>
+</div>
+<div class="product-grid">
+{% for p in products %}
+<article class="product-grid-item">
+<h3>{{p.name}}</h3>
+<div class="product-meta">
+<div><strong>Dealer:</strong> {{p.sku}}</div>
+<div><strong>Category:</strong> {{p.category|default:"-"}}</div>
+<div><strong>Subcategory:</strong> {{p.subcategory|default:"-"}}</div>
+<div><strong>Quantity:</strong> {% if p.is_low_stock %}<span class="stock-low">Low · {{p.quantity}}</span>{% else %}{{p.quantity}}{% endif %}</div>
+</div>
+</article>
+{% empty %}<div>No products found.</div>{% endfor %}
+</div>
+<div class="table-wrap"><table><tr><th>Product Name</th><th>Dealer Details</th><th>Category</th><th>Quantity</th><th>Low Stock Limit</th><th>Action</th></tr>
 {% for p in products %}<tr><td>{{p.name}}</td><td>{{p.sku}}</td><td>{{p.category|default:"-"}}{% if p.subcategory %} · {{p.subcategory}}{% endif %}</td><td>{% if p.is_low_stock %}<span class="stock-low" role="status">Low · {{p.quantity}}</span>{% else %}{{p.quantity}}{% endif %}</td><td>{{p.low_stock_limit}}</td>
 <td class="actions"><a class="btn gray" href="/products/{{p.id}}/edit/">Edit</a><form method="post" action="/products/{{p.id}}/delete/" onsubmit="return confirm('Delete this product?')">{% csrf_token %}<button class="btn red" type="submit">Delete</button></form></td></tr>
-{% empty %}<tr><td colspan="6">No products found.</td></tr>{% endfor %}</table>{% endblock %}
+{% empty %}<tr><td colspan="6">No products found.</td></tr>{% endfor %}</table></div>{% endblock %}

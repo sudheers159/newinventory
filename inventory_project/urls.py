@@ -12,6 +12,7 @@ urlpatterns = [
     path("logout/", LogoutView.as_view(next_page="login"), name="logout"),
     path("", views.dashboard, name="dashboard"),
     path("products/", views.products, name="products"),
+    path("products/export/<str:file_type>/", views.export_products, name="export_products"),
     path("products/add/", views.add_product, name="add_product"),
     path("products/<int:pk>/edit/", views.edit_product, name="edit_product"),
     path("products/<int:pk>/delete/", views.delete_product, name="delete_product"),

@@ -94,6 +94,7 @@ class PlayingCardProductTests(TestCase):
                     self.playing_card,
                     subcategory=subcategory,
                     sku=sku,
+                    name=f"Card Stock {subcategory}",
                 ),
             )
             self.assertRedirects(response, "/products/")
@@ -120,11 +121,18 @@ class PlayingCardProductTests(TestCase):
             category=self.device,
         )
 
-        response = self.client.post("/products/add/", self.product_data(self.camera))
+        response = self.client.post(
+            "/products/add/",
+            self.product_data(self.camera, name="Camera item"),
+        )
         self.assertRedirects(response, "/products/")
         response = self.client.post(
             "/products/add/",
-            self.product_data(self.playing_card, subcategory="5C"),
+            self.product_data(
+                self.playing_card,
+                subcategory="5C",
+                name="Card item",
+            ),
         )
         self.assertRedirects(response, "/products/")
         self.assertEqual(
@@ -144,6 +152,102 @@ class PlayingCardProductTests(TestCase):
         self.assertRedirects(response, "/products/")
         self.assertEqual(Product.objects.filter(sku="CARD-001").count(), 2)
 
+    def test_product_name_can_be_reused_across_categories(self):
+        Product.objects.create(
+            name="Card Stock",
+            sku="EXISTING-001",
+            category=self.device,
+        )
+
+        response = self.client.post("/products/add/", self.product_data(self.camera))
+
+        self.assertRedirects(response, "/products/")
+        self.assertEqual(
+            Product.objects.filter(name="Card Stock").count(),
+            2,
+        )
+
+    def test_same_name_cannot_be_reused_for_same_category_and_subcategory(self):
+        first_response = self.client.post(
+            "/products/add/",
+            self.product_data(
+                self.playing_card,
+                subcategory="5C",
+                sku="CARD-5C",
+            ),
+        )
+        second_response = self.client.post(
+            "/products/add/",
+            self.product_data(
+                self.playing_card,
+                subcategory="5C",
+                sku="CARD-5C-DUPLICATE",
+            ),
+        )
+
+        self.assertRedirects(first_response, "/products/")
+        self.assertEqual(second_response.status_code, 200)
+        self.assertContains(
+            second_response,
+            "A product with this name already exists in this category and subcategory.",
+        )
+        self.assertEqual(
+            Product.objects.filter(name="Card Stock", category=self.playing_card).count(),
+            1,
+        )
+
+    def test_same_playing_card_name_can_be_reused_for_another_subcategory(self):
+        first_response = self.client.post(
+            "/products/add/",
+            self.product_data(
+                self.playing_card,
+                subcategory="5C",
+                sku="CARD-5C",
+            ),
+        )
+        second_response = self.client.post(
+            "/products/add/",
+            self.product_data(
+                self.playing_card,
+                subcategory="4G",
+                sku="CARD-4G",
+            ),
+        )
+
+        self.assertRedirects(first_response, "/products/")
+        self.assertRedirects(second_response, "/products/")
+        self.assertEqual(
+            Product.objects.filter(name="Card Stock", category=self.playing_card).count(),
+            2,
+        )
+
+    def test_playing_card_subcategory_can_be_reused_for_a_different_product_name(self):
+        Product.objects.create(
+            name="Existing card",
+            sku="CARD-EXISTING",
+            category=self.playing_card,
+            subcategory="5C",
+        )
+
+        response = self.client.post(
+            "/products/add/",
+            self.product_data(
+                self.playing_card,
+                name="Another card",
+                sku="CARD-ANOTHER",
+                subcategory="5C",
+            ),
+        )
+
+        self.assertRedirects(response, "/products/")
+        self.assertEqual(
+            Product.objects.filter(
+                category=self.playing_card,
+                subcategory="5C",
+            ).count(),
+            2,
+        )
+
     def test_product_removal_requires_post_and_succeeds(self):
         product = Product.objects.create(
             name="To remove",
@@ -158,6 +262,33 @@ class PlayingCardProductTests(TestCase):
         response = self.client.post(f"/products/{product.pk}/delete/")
         self.assertRedirects(response, "/products/")
         self.assertFalse(Product.objects.filter(pk=product.pk).exists())
+
+    def test_product_export_formats_download_with_data(self):
+        Product.objects.create(
+            name="Export item",
+            sku="EXPORT-001",
+            category=self.device,
+            quantity=3,
+        )
+
+        csv_response = self.client.get("/products/export/csv/")
+        self.assertEqual(csv_response.status_code, 200)
+        self.assertEqual(csv_response["Content-Type"], "text/csv")
+        self.assertContains(csv_response, "Export item")
+        self.assertIn(".csv", csv_response["Content-Disposition"])
+
+        excel_response = self.client.get("/products/export/excel/")
+        self.assertEqual(excel_response.status_code, 200)
+        self.assertEqual(
+            excel_response["Content-Type"],
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        )
+        self.assertIn(".xlsx", excel_response["Content-Disposition"])
+
+        pdf_response = self.client.get("/products/export/pdf/")
+        self.assertEqual(pdf_response.status_code, 200)
+        self.assertEqual(pdf_response["Content-Type"], "application/pdf")
+        self.assertIn(".pdf", pdf_response["Content-Disposition"])
 
     def test_dashboard_shows_stock_in_and_out_unit_totals(self):
         product = Product.objects.create(

@@ -63,7 +63,7 @@ class ProductForm(forms.ModelForm):
         cleaned_data = super().clean()
         category = cleaned_data.get("category")
         subcategory = cleaned_data.get("subcategory")
-        if category and category.name == "Playing Card":
+        if category and category.name in ("Playing Card", "Playing Cards"):
             if not subcategory:
                 self.add_error("subcategory", "Choose a subcategory for Playing Card.")
         else:
